@@ -1,31 +1,22 @@
-import express from 'express'
-import devBundle from './devBundle' //Only for development mode
-import path from 'path'
-import template from './../template'
-import { MongoClient } from 'mongodb'
+import config from './../config/config'
+import app from './express'
+import mongoose from 'mongoose'
 
-const app = express()
-devBundle.compile(app) // Only for development mode
-
-const url = process.env.MONGODB_URI || 'mongodb://localhost:27017/mernSetup'
-MongoClient.connect(url, (err, db)=> {
-  console.log('Connected successfully to mongodb server')
-  db.close()
+mongoose.Promise = global.Promise
+mongoose.connect(config.mongoUri, 
+  { useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true
 })
 
-app.get ('/', (req, res) => {
-  res.status(200).send(template())
+mongoose.connection.on('error', () =>{
+  throw new Error(`unable to connect to database: ${mongoUri}`)
 })
 
-let port = process.env.PORT || 3000
-app.listen(port, function onStart (err){
-  if (err){
+app.listen(config.port, (err)=> {
+  if (err) {
     console.log(err)
   }
-  console.info('Server started on port %s.', port)
+  console.info("Server started at %s", config.port)
 })
-
-const CURRENT_WORKING_DIR = process.cwd()
-app.use('/dist', express.static(path.join(CURRENT_WORKING_DIR, 'dist')))
-//configures the Express app to return static files from the dist folder when the requested route starts with /dist
 
