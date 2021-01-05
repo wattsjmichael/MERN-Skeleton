@@ -2,7 +2,6 @@ import User from '../models/user.model'
 import extend from 'lodash/extend'
 import errorHandler from './../helpers/dbErrorHandler'
 
-
 const create = async (req, res) => {
   const user = new User(req.body)
   try {
@@ -12,22 +11,14 @@ const create = async (req, res) => {
     })
   } catch (err) {
     return res.status(400).json({
-      error: errorHandler.getErrorMessage(error)
-    })
-  }
-}
-
-const list = async (req, res) => {
-  try {
-    let users = await User.find().select('name email updated created') //Only populates these entries
-    res.json(users)
-  } catch (err) {
-    return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
     })
   }
 }
 
+/**
+ * Load user and append to req.
+ */
 const userByID = async (req, res, next, id) => {
   try {
     let user = await User.findById(id)
@@ -50,9 +41,21 @@ const read = (req, res) => {
   return res.json(req.profile)
 }
 
+const list = async (req, res) => {
+  try {
+    let users = await User.find().select('name email updated created')
+    res.json(users)
+  } catch (err) {
+    return res.status(400).json({
+      error: errorHandler.getErrorMessage(err)
+    })
+  }
+}
+
 const update = async (req, res) => {
   try {
-    let user = req.profileuser = extend(user, reeq.body)
+    let user = req.profile
+    user = extend(user, req.body)
     user.updated = Date.now()
     await user.save()
     user.hashed_password = undefined
@@ -64,6 +67,7 @@ const update = async (req, res) => {
     })
   }
 }
+
 const remove = async (req, res) => {
   try {
     let user = req.profile
@@ -71,11 +75,18 @@ const remove = async (req, res) => {
     deletedUser.hashed_password = undefined
     deletedUser.salt = undefined
     res.json(deletedUser)
-  } catch (err){
+  } catch (err) {
     return res.status(400).json({
       error: errorHandler.getErrorMessage(err)
     })
   }
 }
 
-export default { create, userByID, read, list, remove, update }
+export default {
+  create,
+  userByID,
+  read,
+  list,
+  remove,
+  update
+}
