@@ -48,14 +48,14 @@ const signin = async (req, res) => {
 const signout = (req, res) => {
   res.clearCookie("t")
   return res.status('200').json({
-    message: "Signed out"
+    message: "signed out"
   })
 }
 
 const requireSignin = expressJwt({
   secret: config.jwtSecret,
   userProperty: 'auth',
-  algorithms: ['HS256']
+  algorithms: ['RS256']  
 })
 
 const hasAuthorization = (req, res, next) => {
@@ -68,4 +68,9 @@ const hasAuthorization = (req, res, next) => {
   next()
 }
 
-export default { signin, signout, requireSignin, hasAuthorization }
+export default {
+  signin,
+  signout,
+  requireSignin,
+  hasAuthorization
+}
